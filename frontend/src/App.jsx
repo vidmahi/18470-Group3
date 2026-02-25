@@ -1,6 +1,19 @@
+import { useState } from 'react'
 import './App.css'
 
 function App() {
+  const [showCreate, setShowCreate] = useState(false)
+
+  // TODO: hook — replace with sign-in API call
+  function handleSignIn(e) {
+    e.preventDefault()
+  }
+
+  // TODO: hook — replace with create-account API call
+  function handleCreateAccount(e) {
+    e.preventDefault()
+  }
+
   return (
     <div className="app-page">
       <header className="app-header">
@@ -8,34 +21,59 @@ function App() {
         <p>Student Resource Management System</p>
       </header>
 
-      <main className="login-card">
-        <h2>Sign In</h2>
+      {!showCreate ? (
+        <main className="login-card">
+          <h2>Sign In</h2>
 
-        <form className="login-form">
-          <label htmlFor="user-id">User ID</label>
-          <div className="input-wrapper">
-            <span aria-hidden="true" className="input-icon">
-              &#128100;
-            </span>
-            <input id="user-id" type="text" placeholder="Enter your user ID" />
-          </div>
+          <form className="login-form" onSubmit={handleSignIn}>
+            <label htmlFor="user-id">User ID</label>
+            <div className="input-wrapper">
+              <span aria-hidden="true" className="input-icon">&#128100;</span>
+              <input id="user-id" type="text" placeholder="Enter your user ID" />
+            </div>
 
-          <label htmlFor="password">Password</label>
-          <div className="input-wrapper">
-            <span aria-hidden="true" className="input-icon">
-              &#128274;
-            </span>
-            <input id="password" type="password" placeholder="Enter your password" />
-          </div>
+            <label htmlFor="password">Password</label>
+            <div className="input-wrapper">
+              <span aria-hidden="true" className="input-icon">&#128274;</span>
+              <input id="password" type="password" placeholder="Enter your password" />
+            </div>
+            <p className="encryption-note">Passwords are secured with bcrypt encryption algorithm</p>
 
-          <button type="submit">Sign In</button>
-        </form>
+            <button type="submit">Sign In</button>
+          </form>
 
-        <div className="card-divider" />
-        <a href="#" className="create-account-link">
-          New user? Create an account
-        </a>
-      </main>
+          <div className="card-divider" />
+          <a href="#" className="create-account-link" onClick={e => { e.preventDefault(); setShowCreate(true) }}>
+            New user? Create an account
+          </a>
+        </main>
+      ) : (
+        <main className="login-card">
+          <h2>Create New Account</h2>
+
+          <form className="login-form" onSubmit={handleCreateAccount}>
+            <label htmlFor="new-user-id">User ID</label>
+            <div className="input-wrapper">
+              <span aria-hidden="true" className="input-icon">&#128100;</span>
+              <input id="new-user-id" type="text" placeholder="Enter your user ID" />
+            </div>
+
+            <label htmlFor="new-password">Password</label>
+            <div className="input-wrapper">
+              <span aria-hidden="true" className="input-icon">&#128274;</span>
+              <input id="new-password" type="password" placeholder="Enter your password" />
+            </div>
+            <p className="encryption-note">Passwords are secured with bcrypt encryption algorithm</p>
+
+            <button type="submit">Create Account</button>
+          </form>
+
+          <div className="card-divider" />
+          <a href="#" className="create-account-link" onClick={e => { e.preventDefault(); setShowCreate(false) }}>
+            Already have an account? Sign in
+          </a>
+        </main>
+      )}
 
       <footer className="demo-note">Demo: Enter any User ID to continue</footer>
     </div>
