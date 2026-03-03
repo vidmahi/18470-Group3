@@ -1,10 +1,10 @@
 # Import necessary libraries and modules
 from pymongo import MongoClient
-import load_dotenv
+from dotenv import load_dotenv
 import os
 
 # Get values from config
-config = load_dotenv.load_dotenv('config.env')
+config = load_dotenv('config.env')
 hardware_db_name = os.getenv('HARDWARE_DB_NAME')
 hardware_collection_name = os.getenv('HARDWARE_COLLECTION_NAME')
 
