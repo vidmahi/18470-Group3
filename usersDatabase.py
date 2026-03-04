@@ -64,6 +64,9 @@ def joinProject(client, userId, projectId):
     # Check that project exists
     if not projectsDB.projectExists(client, projectId):
         return False
+    
+    if has_joined_project(client, userId, projectId):
+        return False
 
     # add projct to user's list if not already there
     result = users.update_one(
@@ -86,3 +89,29 @@ def getUserProjectsList(client, userId):
         return []
 
     return user.get("projects", [])
+
+def validate_duplicate_users(client, userId):
+    db = client["HaaS_DB"]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId})
+
+    if user is None:
+       return True
+
+    return False
+
+def has_joined_project(client, userId, projectId):
+    db = client["HaaS_DB"]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId, "projects": projectId})
+
+    if user is None:
+        return False
+    
+    return True
+
+
+
+
