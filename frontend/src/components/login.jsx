@@ -3,6 +3,31 @@ import { useState } from 'react'
 function Login({ onSignIn, onCreateAccount }) {
   const [showCreate, setShowCreate] = useState(false)
 
+  // Store user types
+  const [userId, setUserId] = useState('')
+  const [password, setPassword] = useState('')
+  const [status, setStatus] = useState('')
+
+  // Call Backend
+  async function handleSignIN(e) {
+    e.preventDefault()
+    setStatus('Sending information...')
+
+    try {
+      const res = await fetch('http://127.0.0.1:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, password })
+      })
+  
+    const data = await res.json().catch(() => ({}))
+    setStatus('Backend replied: ' + JSON.stringify(data))
+    } catch (err) {
+      setStatus('Failed to reach backend. Is Flask running?')
+    }
+
+  }
+
   return (
     <div className="app-page">
       <header className="app-header">
@@ -14,7 +39,7 @@ function Login({ onSignIn, onCreateAccount }) {
         <main className="login-card">
           <h2>Sign In</h2>
 
-          <form className="login-form" onSubmit={onSignIn}>
+          <form className="login-form" onSubmit={handleSignIN}>
             <label htmlFor="user-id">User ID</label>
             <div className="input-wrapper">
               <span aria-hidden="true" className="input-icon">&#128100;</span>
@@ -29,6 +54,8 @@ function Login({ onSignIn, onCreateAccount }) {
             <p className="encryption-note">Passwords are secured with bcrypt encryption algorithm</p>
 
             <button type="submit">Sign In</button>
+
+            {status && <p style={{ marginTop: 12}}>{status}</p>}
           </form>
 
           <div className="card-divider" />
