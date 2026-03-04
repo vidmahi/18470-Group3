@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Login({ onSignIn, onCreateAccount }) {
+function Login({ onSignIn, onCreateAccount, onManagerAccess }) {
   const [showCreate, setShowCreate] = useState(false)
 
   return (
@@ -65,6 +65,8 @@ function Login({ onSignIn, onCreateAccount }) {
       )}
 
       <footer className="demo-note">Demo: Enter any User ID to continue</footer>
+
+      <button className="manager-btn" onClick={onManagerAccess}>Manager</button>
     </div>
   )
 }
