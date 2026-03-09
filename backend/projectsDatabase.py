@@ -17,12 +17,33 @@ Project = {
 # Function to query a project by its ID
 def queryProject(client, projectId):
     # Query and return a project from the database
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({'projectId': projectId})
+    return project
 
 # Function to create a new project
 def createProject(client, projectName, projectId, description):
     # Create a new project in the database
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    existing_project = projects.find_one({'projectId': projectId})
+    
+    if existing_project is not None:
+        return False
+    
+    project = {
+        "projectName": projectName, 
+        "projectId": projectId, 
+        "description": description, 
+        "hwSets": {}, 
+        "users": []
+    }
+
+    projects.insert_one(project)
+    return True
 
 # Function to add a user to a project
 def addUser(client, projectId, userId):
