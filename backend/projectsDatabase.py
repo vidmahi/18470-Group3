@@ -71,12 +71,13 @@ def checkOutHW(client, projectId, hwSetName, qty, userId):
         result = users.update_one(
         {"userId": userId},
         {
-        "$inc": { "hwSets.$[hwSet].hwSetName": -qty} 
+        "$inc": {"hwSets."+hwSetName: -qty} 
         }
     )
+        return True
     else:
         return False
-    return True
+    
     
 
 
@@ -97,10 +98,11 @@ def checkInHW(client, projectId, hwSetName, qty, userId):
         result = users.update_one(
         {"userId": userId},
         {
-        "$inc": { "hwSets.$[hwSet].hwSetName": +qty} 
-        }
+        "$inc": {"hwSets."+hwSetName: +qty}
+        }   
     )
+        return True
     else:
         return False
-    return True
+    
 
