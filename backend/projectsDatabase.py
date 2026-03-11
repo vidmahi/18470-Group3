@@ -1,7 +1,7 @@
 # Import necessary libraries and modules
 from pymongo import MongoClient
 
-import hardwareDB
+import hardwareDatabase
 
 '''
 Structure of Project entry:
@@ -57,11 +57,50 @@ def updateUsage(client, projectId, hwSetName):
 
 # Function to check out hardware for a project
 def checkOutHW(client, projectId, hwSetName, qty, userId):
-    # Check out hardware for the specified project and update availability
-    pass
+    db = client["HaaS_DB"]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId, "projects": projectId, 'hwSets': hwSetName})
+    
+    if user is None:
+        return False
+    
+    space = hardwareDatabase.requestSpace(client, hwSetName, qty)
+
+    if space == True:
+        result = users.update_one(
+        {"userId": userId},
+        {
+        "$inc": { "hwSets.$[hwSet].hwSetName": -qty} 
+        }
+    )
+    else:
+        return False
+    return True
+    
+
 
 # Function to check in hardware for a project
 def checkInHW(client, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
-    pass
+    db = client["HaaS_DB"]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId, "projects": projectId, 'hwSets': hwSetName})
+    
+    if user is None:
+        return False
+    
+    space = hardwareDatabase.requestSpace(client, hwSetName, qty)
+
+    if space == True:
+        result = users.update_one(
+        {"userId": userId},
+        {
+        "$inc": { "hwSets.$[hwSet].hwSetName": +qty} 
+        }
+    )
+    else:
+        return False
+    return True
 
