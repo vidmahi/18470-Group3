@@ -26,13 +26,38 @@ def createProject(client, projectName, projectId, description):
 
 # Function to add a user to a project
 def addUser(client, projectId, userId):
-    # Add a user to the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectId": projectId})
+    if project is None:
+        return False
+
+    result = projects.update_one(
+        {"projectId": projectId},
+        {"$addToSet": {"users": userId}}
+    )
+
+    return result.modified_count > 0
 
 # Function to update hardware usage in a project
 def updateUsage(client, projectId, hwSetName):
-    # Update the usage of a hardware set in the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectId": projectId})
+    if project is None:
+        return False
+
+    if hwSetName not in project["hwSets"]:
+        return False
+
+    result = projects.update_one(
+        {"projectId": projectId},
+        {"$inc": {f"hwSets.{hwSetName}": 1}}
+    )
+
+    return result.modified_count > 0
 
 # Function to check out hardware for a project
 def checkOutHW(client, projectId, hwSetName, qty, userId):
@@ -43,4 +68,3 @@ def checkOutHW(client, projectId, hwSetName, qty, userId):
 def checkInHW(client, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
     pass
-
