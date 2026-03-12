@@ -2,6 +2,7 @@
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+from flask_cors import CORS
 
 # Import custom modules for database interactions
 # import usersDB
@@ -13,6 +14,7 @@ MONGODB_SERVER = "your_mongodb_connection_string_here"
 
 # Initialize a new Flask web application
 app = Flask(__name__)
+CORS(app)
 
 # Route for user login
 @app.route('/login', methods=['POST'])
