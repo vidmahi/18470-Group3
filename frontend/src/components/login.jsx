@@ -1,14 +1,11 @@
 import { useState } from 'react'
 
-function Login({ onSignIn, onCreateAccount }) {
+function Login() {
   const [showCreate, setShowCreate] = useState(false)
-
-  // Store user types
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState('')
 
-  // Call Backend
   async function handleSignIN(e) {
     e.preventDefault()
     setStatus('Sending information...')
@@ -19,13 +16,12 @@ function Login({ onSignIn, onCreateAccount }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, password })
       })
-  
-    const data = await res.json().catch(() => ({}))
-    setStatus('Backend replied: ' + JSON.stringify(data))
+
+      const data = await res.json().catch(() => ({}))
+      setStatus(data.message || JSON.stringify(data))
     } catch (err) {
       setStatus('Failed to reach backend. Is Flask running?')
     }
-
   }
 
   return (
@@ -43,23 +39,45 @@ function Login({ onSignIn, onCreateAccount }) {
             <label htmlFor="user-id">User ID</label>
             <div className="input-wrapper">
               <span aria-hidden="true" className="input-icon">&#128100;</span>
-              <input id="user-id" type="text" placeholder="Enter your user ID" />
+              <input
+                id="user-id"
+                type="text"
+                placeholder="Enter your user ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              />
             </div>
 
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
               <span aria-hidden="true" className="input-icon">&#128274;</span>
-              <input id="password" type="password" placeholder="Enter your password" />
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <p className="encryption-note">Passwords are secured with bcrypt encryption algorithm</p>
+
+            <p className="encryption-note">
+              Passwords are secured with bcrypt encryption algorithm
+            </p>
 
             <button type="submit">Sign In</button>
 
-            {status && <p style={{ marginTop: 12}}>{status}</p>}
+            {status && <p style={{ marginTop: 12 }}>{status}</p>}
           </form>
 
           <div className="card-divider" />
-          <a href="#" className="create-account-link" onClick={e => { e.preventDefault(); setShowCreate(true) }}>
+          <a
+            href="#"
+            className="create-account-link"
+            onClick={(e) => {
+              e.preventDefault()
+              setShowCreate(true)
+            }}
+          >
             New user? Create an account
           </a>
         </main>
@@ -67,7 +85,7 @@ function Login({ onSignIn, onCreateAccount }) {
         <main className="login-card">
           <h2>Create New Account</h2>
 
-          <form className="login-form" onSubmit={onCreateAccount}>
+          <form className="login-form">
             <label htmlFor="new-user-id">User ID</label>
             <div className="input-wrapper">
               <span aria-hidden="true" className="input-icon">&#128100;</span>
@@ -79,13 +97,23 @@ function Login({ onSignIn, onCreateAccount }) {
               <span aria-hidden="true" className="input-icon">&#128274;</span>
               <input id="new-password" type="password" placeholder="Enter your password" />
             </div>
-            <p className="encryption-note">Passwords are secured with bcrypt encryption algorithm</p>
+
+            <p className="encryption-note">
+              Passwords are secured with bcrypt encryption algorithm
+            </p>
 
             <button type="submit">Create Account</button>
           </form>
 
           <div className="card-divider" />
-          <a href="#" className="create-account-link" onClick={e => { e.preventDefault(); setShowCreate(false) }}>
+          <a
+            href="#"
+            className="create-account-link"
+            onClick={(e) => {
+              e.preventDefault()
+              setShowCreate(false)
+            }}
+          >
             Already have an account? Sign in
           </a>
         </main>

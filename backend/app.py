@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
+import hashlib
 
 # Import custom modules for database interactions
 # import usersDB
@@ -10,7 +11,8 @@ from flask_cors import CORS
 # import hardwareDB
 
 # Define the MongoDB connection string
-MONGODB_SERVER = "your_mongodb_connection_string_here"
+MONGODB_SERVER = ""
+client = MongoClient(MONGODB_SERVER)
 
 # Initialize a new Flask web application
 app = Flask(__name__)
@@ -20,15 +22,44 @@ CORS(app)
 @app.route('/login', methods=['POST'])
 def login():
     # Extract data from request
+    data = request.get_json()
+    userId = data.get("userId")
+    password = data.get("password")
+
+    if not userId or not password:
+        return jsonify({
+            "success": False,
+            "message": "Missing userId or password"
+        }), 400
 
     # Connect to MongoDB
+    db = client["HaaS_DB"]
+    users = db["users"]
 
     # Attempt to log in the user using the usersDB module
+    user = users.find_one({"userId": userId})
 
     # Close the MongoDB connection
 
     # Return a JSON response
-    return jsonify({})
+    if user is None:
+        return jsonify({
+            "success": False,
+            "message": "User does not exist"
+        }), 404
+
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    if password_hash == user["password"]:
+        return jsonify({
+            "success": True,
+            "message": "Login successful"
+        })
+    else:
+        return jsonify({
+            "success": False,
+            "message": "Incorrect password"
+        }), 401
 
 # Route for the main page (Work in progress)
 @app.route('/main')
@@ -62,15 +93,48 @@ def join_project():
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Extract data from request
+    data = request.get_json()
+    username = data.get("username")
+    userId = data.get("userId")
+    password = data.get("password")
+
+    if not username or not userId or not password:
+        return jsonify({
+            "success": False,
+            "message": "Missing username, userId, or password"
+        }), 400
 
     # Connect to MongoDB
+    db = client["HaaS_DB"]
+    users = db["users"]
 
     # Attempt to add the user using the usersDB module
+    existing_user = users.find_one({"userId": userId})
+
+    if existing_user is not None:
+        return jsonify({
+            "success": False,
+            "message": "User already exists"
+        }), 409
+
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    user = {
+        "username": username,
+        "userId": userId,
+        "password": password_hash,
+        "projects": []
+    }
+
+    users.insert_one(user)
 
     # Close the MongoDB connection
 
     # Return a JSON response
-    return jsonify({})
+    return jsonify({
+        "success": True,
+        "message": "User added successfully"
+    })
 
 # Route for getting the list of user projects
 @app.route('/get_user_projects_list', methods=['POST'])
@@ -196,5 +260,4 @@ def check_inventory():
 
 # Main entry point for the application
 if __name__ == '__main__':
-    app.run()
-
+    app.run(debug=True)
