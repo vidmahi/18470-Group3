@@ -1,7 +1,7 @@
 # Import necessary libraries and modules
 from pymongo import MongoClient
 
-import hardwareDB
+import hardwareDatabase
 
 '''
 Structure of Project entry:
@@ -17,30 +17,128 @@ Project = {
 # Function to query a project by its ID
 def queryProject(client, projectId):
     # Query and return a project from the database
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({'projectId': projectId})
+    return project
 
 # Function to create a new project
 def createProject(client, projectName, projectId, description):
     # Create a new project in the database
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    existing_project = projects.find_one({'projectId': projectId})
+    
+    if existing_project is not None:
+        return False
+    
+    project = {
+        "projectName": projectName, 
+        "projectId": projectId, 
+        "description": description, 
+        "hwSets": {}, 
+        "users": []
+    }
+
+    projects.insert_one(project)
+    return True
 
 # Function to add a user to a project
 def addUser(client, projectId, userId):
-    # Add a user to the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectID": projectId})
+
+    if project is None:
+        return False
+
+    result = projects.update_one(
+        {"projectId": projectId},
+        {"$addToSet": {"users": userId}}  # prevents duplicates
+    )
+
+    return result.modified_count > 0
 
 # Function to update hardware usage in a project
 def updateUsage(client, projectId, hwSetName):
     # Update the usage of a hardware set in the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectID": projectId})
+
+    if project is None:
+        return False
+
+    result = projects.update_one(
+        {"projectID": projectId},
+        {
+        "$inc": {"hwSets."+hwSetName: 0} 
+        }
+    )
+
+    return result.modified_count > 0
+
 
 # Function to check out hardware for a project
 def checkOutHW(client, projectId, hwSetName, qty, userId):
-    # Check out hardware for the specified project and update availability
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"userId": userId, "projectID": projectId})
+    
+    if project is None:
+        return False
+    
+    space = hardwareDatabase.requestSpace(client, hwSetName, qty)
+
+    if space == True:
+        result = projects.update_one(
+        {"projectID": projectId},
+        {
+        "$inc": {"hwSets."+hwSetName: +qty} 
+        }
+        )
+        return True
+    else:
+        return False
+    
+    
+
 
 # Function to check in hardware for a project
 def checkInHW(client, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"userId": userId, "projectID": projectId})
+    
+    if project is None:
+        return False
+    
+    try:
+        hw_qty = project['hwSets'][hwSetName]
+    except:
+        return False
+    
+    if(hw_qty < qty):
+        return False
+
+    space = hardwareDatabase.requestSpace(client, hwSetName, -qty)
+
+    if space == True:
+        result = projects.update_one(
+        {"projectID": projectId},
+        {
+        "$inc": {"hwSets."+hwSetName: -qty}
+        }   
+    )
+        return True
+    else:
+        return False
+    
 
