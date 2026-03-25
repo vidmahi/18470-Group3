@@ -42,8 +42,13 @@ def requestSpace(client : MongoClient, hwSetName : str, amount : int):
     
     # Query Predicates Link: https://www.mongodb.com/docs/manual/reference/mql/query-predicates/
     # Update Operators: https://www.mongodb.com/docs/manual/reference/mql/update/
+    project  = client[hardware_db_name][hardware_collection_name].find_one({'hwName': hwSetName})
+    availability = project.get("availability")
+    if availability < amount and amount > 0:
+        return False
+    
     doc_result = client[hardware_db_name][hardware_collection_name].find_one_and_update(
-        {'hwName': hwSetName, "availability":{"$gte": amount}},
+        {'hwName': hwSetName},
         {'$inc': {"availability": -amount}},
         return_document=True
     )
