@@ -21,39 +21,42 @@ User = {
 
 # Function to add a new user
 def addUser(client, username, userId, password):
-    db = client[hardware_db_name]
+    # Add a new user to the database
+    db = client["HaaS_DB"]
     users = db["users"]
 
-    user = users.find_one({"username": username, "userId": userId})
+    #Check if user already exists
+    exist_user = __queryUser(client, username, userId)
+    if exist_user is not None:
+        return False #The user already exists
+    
+    #Otherwise, Hash password like def login
+    salt = hashlib.sha256(username.encode()).digest()
+    password_hash = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode(),
+        salt,
+        100_000
+    )
 
-    if user is not None:
-        return False
-
+    #Create user document
     user = {
-        'username': username,
-        'userId': userId,
-        'password': password,
-        'projects': [],
-        'hwSets':  {}
+        "username": username, 
+        "userId": userId, 
+        "password_hash": password_hash, 
+        "salt": salt, 
+        "projects": []
     }
-    result = users.insert_one(user)
-    return True
+
+    users.insert_one(user)
+    return True #User has been added!
 
 # Helper function to query a user by username and userId
 def __queryUser(client, username, userId):
-    db = client[hardware_db_name]
-    users = db["users"]
-    
-    user = users.find_one({"username": username, "userId": userId})
-
-    if user is None:
-        return False
-
-    query = {"username": username, "userId": userId}
-
-    return query
-
-
+    # Query and return a user from the database
+     db = client["HaaS_DB"]
+     users = db["users"]
+     return users.find_one({"username": username, "userId": userId}) 
 
 # Function to log in a user
 def login(client, username, userId, password):
