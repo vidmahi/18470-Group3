@@ -47,33 +47,61 @@ def createProject(client, projectName, projectId, description):
 
 # Function to add a user to a project
 def addUser(client, projectId, userId):
-    # Add a user to the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectID": projectId})
+
+    if project is None:
+        return False
+
+    result = projects.update_one(
+        {"projectId": projectId},
+        {"$addToSet": {"users": userId}}  # prevents duplicates
+    )
+
+    return result.modified_count > 0
 
 # Function to update hardware usage in a project
 def updateUsage(client, projectId, hwSetName):
     # Update the usage of a hardware set in the specified project
-    pass
+    db = client["HaaS_DB"]
+    projects = db["projects"]
+
+    project = projects.find_one({"projectID": projectId})
+
+    if project is None:
+        return False
+
+    result = projects.update_one(
+        {"projectID": projectId},
+        {
+        "$inc": {"hwSets."+hwSetName: 0} 
+        }
+    )
+
+    return result.modified_count > 0
+
 
 # Function to check out hardware for a project
 def checkOutHW(client, projectId, hwSetName, qty, userId):
     db = client["HaaS_DB"]
-    users = db["users"]
+    projects = db["projects"]
 
-    user = users.find_one({"userId": userId, "projects": projectId, 'hwSets': hwSetName})
+    project = projects.find_one({"userId": userId, "projectID": projectId})
     
-    if user is None:
+    if project is None:
         return False
     
     space = hardwareDatabase.requestSpace(client, hwSetName, qty)
 
     if space == True:
-        result = users.update_one(
-        {"userId": userId},
+        result = projects.update_one(
+        {"projectID": projectId},
         {
-        "$inc": {"hwSets."+hwSetName: -qty} 
+        "$inc": {"hwSets."+hwSetName: +qty} 
         }
-    )
+        )
         return True
     else:
         return False
@@ -85,20 +113,28 @@ def checkOutHW(client, projectId, hwSetName, qty, userId):
 def checkInHW(client, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
     db = client["HaaS_DB"]
-    users = db["users"]
+    projects = db["projects"]
 
-    user = users.find_one({"userId": userId, "projects": projectId, 'hwSets': hwSetName})
+    project = projects.find_one({"userId": userId, "projectID": projectId})
     
-    if user is None:
+    if project is None:
         return False
     
-    space = hardwareDatabase.requestSpace(client, hwSetName, qty)
+    try:
+        hw_qty = project['hwSets'][hwSetName]
+    except:
+        return False
+    
+    if(hw_qty < qty):
+        return False
+
+    space = hardwareDatabase.requestSpace(client, hwSetName, -qty)
 
     if space == True:
-        result = users.update_one(
-        {"userId": userId},
+        result = projects.update_one(
+        {"projectID": projectId},
         {
-        "$inc": {"hwSets."+hwSetName: +qty}
+        "$inc": {"hwSets."+hwSetName: -qty}
         }   
     )
         return True
