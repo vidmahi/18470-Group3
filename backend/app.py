@@ -5,12 +5,9 @@ from pymongo import MongoClient
 from flask_cors import CORS
 
 # Import custom modules for database interactions
-# import usersDB
-# import projectsDB
-# import hardwareDB
-
-# Define the MongoDB connection string
-MONGODB_SERVER = "your_mongodb_connection_string_here"
+import usersDatabase as usersDB
+import projectsDatabase as projectsDB
+import hardwareDatabase as  hardwareDB
 
 # Initialize a new Flask web application
 app = Flask(__name__)

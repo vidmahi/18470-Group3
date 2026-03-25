@@ -6,7 +6,6 @@ import os
 # Get values from config
 config = load_dotenv('config.env')
 hardware_db_name = os.getenv('HARDWARE_DB_NAME')
-hardware_collection_name = os.getenv('HARDWARE_COLLECTION_NAME')
 
 '''
 Structure of Hardware Set entry:
@@ -17,11 +16,10 @@ HardwareSet = {
 }
 '''
 
-
 # Function to create a new hardware set
 def createHardwareSet(client : MongoClient, hwSetName : str, initCapacity : int):
     # Create a new hardware set in the database
-    result = client[hardware_db_name][hardware_collection_name].insert_one({
+    result = client[hardware_db_name]["hardware_availability"].insert_one({
         'hwName': hwSetName,
         'capacity': initCapacity,
         'availability': initCapacity
@@ -32,7 +30,7 @@ def createHardwareSet(client : MongoClient, hwSetName : str, initCapacity : int)
 # Function to query a hardware set by its name
 def queryHardwareSet(client : MongoClient, hwSetName : str):
     # Query and return a hardware set from the database
-    doc = client[hardware_db_name][hardware_collection_name].find_one({"hwName": hwSetName})
+    doc = client[hardware_db_name]["hardware_availability"].find_one({"hwName": hwSetName})
     return doc
 
 # Function to request space from a hardware set
@@ -42,12 +40,12 @@ def requestSpace(client : MongoClient, hwSetName : str, amount : int):
     
     # Query Predicates Link: https://www.mongodb.com/docs/manual/reference/mql/query-predicates/
     # Update Operators: https://www.mongodb.com/docs/manual/reference/mql/update/
-    project  = client[hardware_db_name][hardware_collection_name].find_one({'hwName': hwSetName})
+    project  = client[hardware_db_name]["hardware_availability"].find_one({'hwName': hwSetName})
     availability = project.get("availability")
     if availability < amount and amount > 0:
         return False
     
-    doc_result = client[hardware_db_name][hardware_collection_name].find_one_and_update(
+    doc_result = client[hardware_db_name]["hardware_availability"].find_one_and_update(
         {'hwName': hwSetName},
         {'$inc': {"availability": -amount}},
         return_document=True
@@ -58,7 +56,7 @@ def requestSpace(client : MongoClient, hwSetName : str, amount : int):
 # Function to get all hardware set names
 def getAllHwNames(client : MongoClient):
     # Get and return a list of all hardware set names
-    result = client[hardware_db_name][hardware_collection_name].distinct('hwName')
+    result = client[hardware_db_name]["hardware_availability"].distinct('hwName')
     return result
 
 if __name__ == "__main__":
@@ -72,12 +70,12 @@ if __name__ == "__main__":
     
     # Function for testing
     def iterate_db():
-        cursor = client[hardware_db_name][hardware_collection_name].find({})
+        cursor = client[hardware_db_name]["hardware_availability"].find({})
         for doc in cursor:
             print(doc)
             
     print("[INFO] Clearing Hardware Database")
-    client.get_database(hardware_db_name).drop_collection(hardware_collection_name)
+    client.get_database(hardware_db_name).drop_collection("hardware_availability")
     
     print("[INFO] Adding Hardware to the Database")
     createHardwareSet(client, "ARM Graviton", 34)
@@ -103,7 +101,7 @@ if __name__ == "__main__":
     iterate_db()
     
     print("[INFO] Testing with multiple threads for race conditions")
-    client.get_database(hardware_db_name).drop_collection(hardware_collection_name)
+    client.get_database(hardware_db_name).drop_collection("hardware_availability")
     createHardwareSet(client, "Testing_Concurrency", 1000)
     from concurrent.futures import ThreadPoolExecutor
     
