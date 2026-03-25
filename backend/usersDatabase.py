@@ -1,7 +1,13 @@
-# Import necessary libraries and modules
+# Imports
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import projectsDatabase as projectsDB
+import hashlib
+import os
 
-import projectsDB
+# Get values from config
+config = load_dotenv('config.env')
+hardware_db_name = os.getenv('HARDWARE_DB_NAME')
 
 '''
 Structure of User entry:
@@ -15,26 +21,125 @@ User = {
 
 # Function to add a new user
 def addUser(client, username, userId, password):
-    # Add a new user to the database
-    pass
+    db = client[hardware_db_name]
+    users = db["users"]
+
+    user = users.find_one({"username": username, "userId": userId})
+
+    if user is not None:
+        return False
+
+    user = {
+        'username': username,
+        'userId': userId,
+        'password': password,
+        'projects': [],
+        'hwSets':  {}
+    }
+    result = users.insert_one(user)
+    return True
 
 # Helper function to query a user by username and userId
 def __queryUser(client, username, userId):
-    # Query and return a user from the database
-    pass
+    db = client[hardware_db_name]
+    users = db["users"]
+    
+    user = users.find_one({"username": username, "userId": userId})
+
+    if user is None:
+        return False
+
+    query = {"username": username, "userId": userId}
+
+    return query
+
+
 
 # Function to log in a user
 def login(client, username, userId, password):
-    # Authenticate a user and return login status
-    pass
+    """
+    Authenticate a user using username, userId, and password.
+    Returns True if login is successful, False otherwise.
+    """
+    db = client[hardware_db_name]
+    users = db["users"]
 
-# Function to add a user to a project
+    # Find the user in the database
+    user = users.find_one({"username": username, "userId": userId})
+
+    if user is None:
+        return False  # User does not exist
+
+    # Re-hash the entered password using the stored salt
+    # the 100000 is how many times hashed
+    entered_password_hash = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode(),
+        user["salt"],
+        100_000
+    )
+
+    # Compare hashes
+    if entered_password_hash == user["password_hash"]:
+        return True
+    else:
+        return False
+
+
 def joinProject(client, userId, projectId):
-    # Add a user to a specified project
-    pass
+    """
+    Add a project ID to a user's project list.
+    """
+    db = client[hardware_db_name]
+    users = db["users"]
 
-# Function to get the list of projects for a user
+    # Check that project exists
+    if not projectsDB.projectExists(client, projectId):
+        return False
+    
+    if has_joined_project(client, userId, projectId):
+        return False
+
+    # add projct to user's list if not already there
+    result = users.update_one(
+        {"userId": userId},
+        {"$addToSet": {"projects": projectId}}  # prevents duplicates
+    )
+
+    return result.modified_count > 0
+
 def getUserProjectsList(client, userId):
-    # Get and return the list of projects a user is part of
-    pass
+    """
+    Return the list of project IDs for a given user.
+    """
+    db = client[hardware_db_name]
+    users = db["users"]
 
+    user = users.find_one({"userId": userId})
+
+    if user is None:
+        return []
+
+    return user.get("projects", [])
+
+def validate_duplicate_users(client, userId):
+    db = client[hardware_db_name]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId})
+
+    if user is None:
+       return True
+
+    return False
+
+def has_joined_project(client, userId, projectId):
+    db = client[hardware_db_name]
+    users = db["users"]
+
+    user = users.find_one({"userId": userId, "projects": projectId})
+
+    if user is None:
+        return False
+    
+    return True
