@@ -15,13 +15,39 @@ User = {
 
 # Function to add a new user
 def addUser(client, username, userId, password):
-    # Add a new user to the database
-    pass
+    db = client["HaaS_DB"]
+    users = db["users"]
+
+    user = users.find_one({"username": username, "userId": userId})
+
+    if user is not None:
+        return False
+
+    user = {
+        'username': username,
+        'userId': userId,
+        'password': password,
+        'projects': [],
+        'hwSets':  {}
+    }
+    result = users.insert_one(user)
+    return True
 
 # Helper function to query a user by username and userId
 def __queryUser(client, username, userId):
-    # Query and return a user from the database
-    pass
+    db = client["HaaS_DB"]
+    users = db["users"]
+    
+    user = users.find_one({"username": username, "userId": userId})
+
+    if user is None:
+        return False
+
+    query = {"username": username, "userId": userId}
+
+    return query
+
+
 
 # Function to log in a user
 def login(client, username, userId, password):
