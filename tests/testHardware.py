@@ -1,4 +1,4 @@
-#Will test 7-12 and 18-20
+#Will test 7-11 
 import pytest
 import hashlib
 import os
@@ -89,14 +89,70 @@ def test_checkout_hw1(test_client, test_db, setup_project_hw):
 
 
 #8. Checking out Hardware Set 2
-#def test_checkout_hw2(test_client, test_db):
-        #TO DO
+def test_checkout_hw2(test_client, test_db, setup_project_hw):
+        hw_current = test_db["hardware"].find_one({'name': 'HWSet2'})['available']
+        project_current = test_db["projects"].find_one({'projectId': 'p101'})['hwSets']['HWSet2']
+
+        response = test_client.post('/check_out', json={
+            'projectId': 'p101', 
+            'hwName': 'HWSet2', 
+            'quantity': 2
+        })
+        data = response.get_json()
+        assert response.status_code == 200
+        assert data["success"] is True
+        assert data["message"] == "Hardware checked out successfully"
+
+        #9. See if available quantities are reduced in DB
+        hw_remaining = test_db["hardware"].find_one({'name': 'HWSet2'})['available']
+        assert hw_remaining == hw_current - 2
+
+        project_new = test_db["projects"].find_one({'projectId': 'p101'})['hwSets']['HWSet2']
+        assert project_new == project_current + 2 
 
 
 #10. Trying to checkout more than avail.
-#def test_checkout_fail(test_client, test_db):
-        #TO DO
+def test_checkout_fail(test_client, test_db, setup_project_hw):
+     hw_current = test_db["hardware"].find_one({'name': 'HWSet1'})['available']
+
+     response = test_client.post('/check_out', json={
+          'projectId': 'p101', 
+          'hwName': 'HWSet1', 
+          'quantity': hw_current + 1
+     })
+
+     data = response.get_json()
+     assert response.status_code in [400,409]
+     assert data["success"] is False       
 
 #11. Checking IN Hardware Set 1 unit
-#def test_checkin_hw1(test_client, test_db):
-        #TO DO
+def test_checkin_hw1(test_client, test_db, setup_project_hw):
+     #Check something out, and then return it
+     test_client.post('/check_out', json={
+          'projectId': 'p101', 
+          'hwName': 'HWSet1', 
+          'quantity': 1
+     })
+
+     hw_current = test_db["hardware"].find_one({'name': 'HWSet1'})['available']
+     proj_current = test_db["projects"].find_one({'projectId': 'p101'})["hwSets"]["HWSet1"]
+
+     response = test_client.post('/check_in', json ={
+          'projectId': 'p101', 
+          'hwName': 'HWSet1', 
+          'quantity': 1
+     })
+
+     data = response.get_json()
+
+     assert response.status_code == 200
+     assert data["success"] is True
+     assert data["message"] == "Hardware checked in successfully"
+
+     hw_new = test_db["hardware"].find_one({'name': 'HWSet1'})['available']
+     assert hw_new == hw_current + 1
+
+     proj_new = test_db["projects"].find_one({'projectId': 'p101'})["hwSets"]["HWSet1"]
+     assert proj_new == proj_current - 1
+
+     
