@@ -12,26 +12,48 @@ HardwareSet = {
 
 # Function to create a new hardware set
 def createHardwareSet(client, hwSetName, initCapacity):
-    # Create a new hardware set in the database
-    pass
+    db = client["HaaS_DB"]
+    hardware = db["hardware"]
+    if hardware.find_one({"hwName": hwSetName}):
+        return False
+    hwSet = {
+        "hwName": hwSetName,
+        "capacity": initCapacity,
+        "availability": initCapacity
+    }
+    hardware.insert_one(hwSet)
+    return True
 
 # Function to query a hardware set by its name
 def queryHardwareSet(client, hwSetName):
-    # Query and return a hardware set from the database
-    pass
+    db = client["HaaS_DB"]
+    hardware = db["hardware"]
+    hw = hardware.find_one({"hwName": hwSetName})
+    if hw:
+        hw["_id"] = str(hw["_id"])
+    return hw
 
 # Function to update the availability of a hardware set
 def updateAvailability(client, hwSetName, newAvailability):
-    # Update the availability of an existing hardware set
-    pass
+    db = client["HaaS_DB"]
+    hardware = db["hardware"]
+    result = hardware.update_one({"hwName": hwSetName}, {"$set": {"availability": newAvailability}})
+    return result.modified_count > 0
 
 # Function to request space from a hardware set
 def requestSpace(client, hwSetName, amount):
-    # Request a certain amount of hardware and update availability
-    pass
+    db = client["HaaS_DB"]
+    hardware = db["hardware"]
+    hw = hardware.find_one({"hwName": hwSetName})
+    if not hw or hw["availability"] < amount:
+        return False
+    hardware.update_one({"hwName": hwSetName}, {"$inc": {"availability": -amount}})
+    return True
 
 # Function to get all hardware set names
 def getAllHwNames(client):
-    # Get and return a list of all hardware set names
-    pass
+    db = client["HaaS_DB"]
+    hardware = db["hardware"]
+    hw_names = [hw["hwName"] for hw in hardware.find()]
+    return hw_names
 
