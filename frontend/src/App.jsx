@@ -3,34 +3,41 @@ import './App.css'
 import Login from './components/login'
 import UserView from './components/userView'
 import HardwareSet from './components/hardwareSet'
+import ProjectView from './components/projectView'
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [showManager, setShowManager] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
 
-  // TODO: hook — replace with sign-in API call
-  function handleSignIn(e) {
-    e.preventDefault()
-    setCurrentUser({ email: 'user@utexas.edu' })
+  function handleSignIn(user) {
+    setCurrentUser(user)
   }
 
-  // TODO: hook — replace with create-account API call
-  function handleCreateAccount(e) {
-    e.preventDefault()
+  function handleCreateAccount(user) {
+    setCurrentUser(user)
   }
 
   if (showManager) {
-    return <HardwareSet onBack={() => setShowManager(false)} />
+    return <HardwareSet onBack={() => setShowManager(false)} user={currentUser} />
+  }
+
+  if (currentUser && selectedProject) {
+    return (
+      <ProjectView
+        project={selectedProject}
+        user={currentUser}
+        onBack={() => setSelectedProject(null)}
+      />
+    )
   }
 
   if (currentUser) {
     return (
       <UserView
         user={currentUser}
-        projects={[]}
-        onLogout={() => setCurrentUser(null)}
-        onSelectProject={(p) => console.log('selected', p)}
-        onCreateProject={() => console.log('create new')}
+        onLogout={() => { setCurrentUser(null); setSelectedProject(null) }}
+        onSelectProject={p => setSelectedProject(p)}
       />
     )
   }

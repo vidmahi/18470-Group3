@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
 import hashlib
+import certifi
 
 
 # Import custom modules for database interactions
@@ -12,8 +13,8 @@ import projectsDB
 import hardwareDB
 
 # Define the MongoDB connection string
-MONGODB_SERVER = "mongodb+srv://averyneale_db_user:tTLzsZhqVmpLSnvv@cluster0.shl18hb.mongodb.net/?appName=Cluster0"
-client = MongoClient(MONGODB_SERVER)
+MONGODB_SERVER = "mongodb+srv://test123:test123@cluster0.uy9j5dp.mongodb.net/?appName=Cluster0"
+client = MongoClient(MONGODB_SERVER, tlsCAFile=certifi.where())
 
 # Initialize a new Flask web application
 app = Flask(__name__)

@@ -469,3 +469,263 @@
 .hw-btn--checkin:hover {
   filter: brightness(0.95);
 }
+
+/* ── Project View ── */
+.pv-project-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pv-project-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pv-project-id {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #98a2b3;
+  font-family: monospace;
+}
+
+.pv-info-banner {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #1d4ed8;
+  margin-bottom: 28px;
+}
+
+.pv-section-heading {
+  margin: 0 0 18px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #101828;
+}
+
+.pv-banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.pv-banner--ok {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.pv-banner--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.hw-action-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Projects header row ── */
+.projects-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.projects-header-row .projects-heading {
+  margin-bottom: 4px;
+}
+
+.projects-header-row .projects-subheading {
+  margin-bottom: 0;
+}
+
+.new-project-btn {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #4a5ce8, #4f61e8);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.new-project-btn:hover {
+  filter: brightness(0.95);
+}
+
+.projects-loading {
+  color: #667085;
+  font-size: 0.95rem;
+}
+
+.projects-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #667085;
+  font-size: 0.95rem;
+  padding: 40px;
+  width: 100%;
+  text-align: center;
+}
+
+.projects-empty p {
+  margin: 0;
+}
+
+/* ── Create Project Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-card {
+  width: min(480px, 100%);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(16, 24, 40, 0.18);
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #101828;
+}
+
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  color: #667085;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+}
+
+.modal-subheading {
+  margin: 0 0 22px;
+  font-size: 0.9rem;
+  color: #667085;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #344054;
+}
+
+.modal-form input,
+.modal-form textarea {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #344054;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.modal-form input:focus,
+.modal-form textarea:focus {
+  border-color: #4a5ce8;
+  box-shadow: 0 0 0 3px rgba(74, 92, 232, 0.12);
+}
+
+.modal-form input::placeholder,
+.modal-form textarea::placeholder {
+  color: #98a2b3;
+}
+
+.modal-error {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #d92d20;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.modal-btn--cancel {
+  background: #f3f4f6;
+  color: #344054;
+  border: 1px solid #d0d5dd;
+}
+
+.modal-btn--cancel:hover {
+  background: #e9eaec;
+}
+
+.modal-btn--create {
+  background: linear-gradient(90deg, #4a5ce8, #4f61e8);
+  color: #ffffff;
+}
+
+.modal-btn--create:hover {
+  filter: brightness(0.95);
+}
+
+.modal-btn--create:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
